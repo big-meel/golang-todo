@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-type item Struct {
-	Task string
-	Done bool
-	CreatedAt time.Time
+type item struct {
+	Task        string
+	Done        bool
+	CreatedAt   time.Time
 	CompletedAt time.Time
 }
 
@@ -19,11 +19,11 @@ type item Struct {
 type List []item
 
 func (l *List) Add(task string) {
-	t := item {
-		Task: task,
-		Done: false,
-		CreatedAt: time.Now(),
-		CompletedAt: timeTime{},
+	t := item{
+		Task:        task,
+		Done:        false,
+		CreatedAt:   time.Now(),
+		CompletedAt: time.Time{},
 	}
 
 	*l = append(*l, t)
@@ -53,5 +53,30 @@ func (l *List) Delete(i int) error {
 	// Adjusting index for 0 based index
 	// Add to a slice of everything before the target index, everything after
 	// thereby removing the target
-	*l = append(ls[:i - 1], ls[i:]...)
+	*l = append(ls[:i-1], ls[i:]...)
+
+	return nil
+}
+
+func (l *List) Save(filename string) error {
+	js, err := json.Marshal(l)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filename, js, 0644)
+}
+
+func (l *List) Get(filename string) error {
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
+	if len(file) == 0 {
+		return nil
+	}
+	return json.Unmarshal(file, l)
 }
